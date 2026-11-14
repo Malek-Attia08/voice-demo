@@ -1,0 +1,7 @@
+.env
+data/
+.venv-api/
+.venv-worker/
+__pycache__/
+*.pyc
+*.sqlite3
