@@ -1,0 +1,18 @@
+# The LiveKit server of the demo (service `livekit` in docker-compose.yml).
+# Development keys only: a real deployment sets its own key and secret. The same key and secret must be in .env
+# (LIVEKIT_API_KEY, LIVEKIT_API_SECRET); if you change them here, change them there.
+port: 7880
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  # Browsers on this machine reach the media ports here.
+  node_ip: 127.0.0.1
+keys:
+  devkey: carevoice-local-livekit-secret-change-me-please
+# LiveKit tells the API when a room is finished, so the call it held ends whoever closed the room
+# (POST /api/livekit-webhook; the message is signed with the key above). host.docker.internal reaches the API
+# on this machine, whether it runs in Docker or straight from a virtual environment, as long as it listens on port 8000.
+webhook:
+  api_key: devkey
+  urls:
+    - http://host.docker.internal:8000/api/livekit-webhook

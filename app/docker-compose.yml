@@ -1,0 +1,75 @@
+# CareVoice: the whole demo with one command, from C:\voice-demo\app:
+#
+#   docker compose up --build
+#
+# Then open http://localhost:8000
+#
+# Three services, each with only the secrets it needs:
+#   livekit  carries the audio between the page and the worker (knows nothing about Gemini or Mistral)
+#   api      the page, the call setup, the cloned-voice library and vault, the speech route (holds the Mistral key and
+#            the master key)
+#   worker   Gemini Live + the fake tools + the cloned voice (holds the Google key, never the Mistral key)
+#
+# Settings come from .env (see .env.example and README.md). Nothing is read from anywhere else.
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.10
+    restart: unless-stopped
+    command: ["--config", "/etc/livekit.yaml", "--bind", "0.0.0.0"]
+    ports:
+      - "7880:7880/tcp"
+      - "7881:7881/tcp"
+      - "7882:7882/udp"
+    volumes:
+      - ./docker/livekit.yaml:/etc/livekit.yaml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DEMO_DB_PATH: /data/demo.sqlite3
+      DEMO_SECRET: ${DEMO_SECRET:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      TTS_API_BASE: ${TTS_API_BASE:-https://api.mistral.ai}
+      TTS_MODEL: ${TTS_MODEL:-voxtral-mini-tts-3}
+      TTS_CLONE_EXPRESSIVENESS: ${TTS_CLONE_EXPRESSIVENESS:-3.0}
+      TTS_CLONE_PACE: ${TTS_CLONE_PACE-moderate}
+      VOICE_MASTER_KEYS: ${VOICE_MASTER_KEYS:-}
+      VOICE_CARE_AT: ${VOICE_CARE_AT:-00:00}
+      VOICE_CARE_TIMEZONE: ${VOICE_CARE_TIMEZONE:-Europe/Brussels}
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_PUBLIC_URL: ws://localhost:7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-carevoice-local-livekit-secret-change-me-please}
+    volumes:
+      - demo-data:/data
+    depends_on:
+      - livekit
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GEMINI_LIVE_MODEL: ${GEMINI_LIVE_MODEL:-gemini-3.8-live}
+      GEMINI_LIVE_VOICE: ${GEMINI_LIVE_VOICE:-Kore}
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-carevoice-local-livekit-secret-change-me-please}
+      DEMO_API_URL: http://api:8000
+    depends_on:
+      - livekit
+      - api
+
+volumes:
+  # The database: the cloned voices and their encrypted recordings. Deleting this volume deletes them
+  # (the voices at Mistral stay until you delete them in the page).
+  demo-data:
