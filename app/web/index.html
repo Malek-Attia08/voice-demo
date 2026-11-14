@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareVoice</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- LiveKit's browser client, pinned. The page needs the internet for this one file (see README). -->
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.0/dist/livekit-client.umd.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="dot" aria-hidden="true"></span>CareVoice</div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-call" aria-controls="panel-call" aria-selected="true">Call</button>
+      <button role="tab" id="tab-voices" aria-controls="panel-voices" aria-selected="false">Voices</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ───────────── CALL ───────────── -->
+    <section id="panel-call" role="tabpanel" aria-labelledby="tab-call">
+      <div class="grid">
+        <div class="card stage">
+          <div class="row spread">
+            <label class="field">Language
+              <select id="call-language"></select>
+            </label>
+            <div class="field">
+              <span id="switch-label">Who speaks</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="switch-label">
+                <button type="button" role="radio" id="mode-gemini" aria-checked="true">Gemini's voice</button>
+                <button type="button" role="radio" id="mode-clone" aria-checked="false">Cloned voice</button>
+              </div>
+            </div>
+          </div>
+          <p id="mode-hint" class="hint"></p>
+
+          <div class="orb-wrap">
+            <div id="orb" class="orb" data-state="idle" aria-hidden="true"></div>
+            <div id="state" class="state" role="status">Ready</div>
+            <div id="timer" class="timer" aria-hidden="true">00:00</div>
+          </div>
+
+          <div class="row center">
+            <button id="call-button" class="primary big" type="button">Start call</button>
+          </div>
+          <p id="call-error" class="error" role="alert" hidden></p>
+          <p id="speaking-in" class="hint center-text" hidden></p>
+        </div>
+
+        <div class="card transcript-card">
+          <h2>Conversation</h2>
+          <ol id="transcript" class="transcript" aria-live="polite"></ol>
+          <p id="transcript-empty" class="empty">Start a call and talk. Your words and the answers appear here.</p>
+        </div>
+
+        <div class="card tools-card">
+          <h2>Tool calls</h2>
+          <p class="hint">Mira has five tools with fixed data: <code>rag_answer</code>, <code>history</code>, <code>medical_info</code>, <code>get_time</code>, <code>find_appointment_slots</code>. Ask about appointments, opening hours, prescriptions, a fever or a headache, or the time.</p>
+          <ol id="tools" class="tools"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── VOICES ───────────── -->
+    <section id="panel-voices" role="tabpanel" aria-labelledby="tab-voices" hidden>
+      <div class="grid two">
+        <div class="card">
+          <h2>Your cloned voices</h2>
+          <p id="cloning-off" class="notice" hidden>Cloning is off: set <code>MISTRAL_API_KEY</code> in <code>.env</code> and restart the API.</p>
+          <ul id="clone-list" class="clone-list"></ul>
+          <p id="clone-empty" class="empty">No voice yet. Add one on the right.</p>
+          <p class="hint">One voice speaks each language. “Use this voice” makes it the one the call uses for its language.</p>
+        </div>
+
+        <div class="card">
+          <h2>Add a voice</h2>
+          <form id="clone-form" class="form" autocomplete="off">
+            <label class="field">Language of the voice
+              <select id="clone-language"></select>
+            </label>
+            <label class="field">Name of the voice
+              <input id="clone-label" placeholder="e.g. Sarah, English" maxlength="80">
+            </label>
+            <label class="field wide">Who speaks
+              <input id="clone-speaker" placeholder="Full name of the person speaking" maxlength="200">
+            </label>
+
+            <div class="modes wide" role="radiogroup" aria-label="How to add the voice">
+              <div id="mode-record" class="mode on" data-mode="record">
+                <label class="mode-head"><input type="radio" name="how" value="record" checked>Record the speaker</label>
+                <p class="sentence"><span class="sentence-label">Read this aloud (8 to 25 seconds)</span><span id="sentence"></span></p>
+                <button id="record-button" type="button" class="ghost">Record</button>
+                <span id="record-timer" class="timer small" hidden></span>
+              </div>
+              <div id="mode-import" class="mode off" data-mode="import">
+                <label class="mode-head"><input type="radio" name="how" value="import">Import a file</label>
+                <label class="file">mp3 or wav <input id="import-file" type="file" accept="audio/mpeg,audio/wav,.mp3,.wav"></label>
+              </div>
+            </div>
+
+            <div id="sample-chip" class="chip wide" hidden>
+              <span id="sample-name"></span>
+              <button id="sample-remove" type="button" aria-label="Remove the recording in use">×</button>
+            </div>
+            <audio id="sample-preview" class="wide" controls hidden></audio>
+
+            <label id="tick" class="check wide" hidden><input id="tick-box" type="checkbox"> I read the sentence above aloud.</label>
+            <label id="consent" class="check wide" hidden>
+              <input id="consent-box" type="checkbox">
+              <span id="consent-text"></span>
+            </label>
+
+            <div class="wide">
+              <button id="make-button" class="primary" type="submit" disabled>Make the voice</button>
+              <p id="still-needed" class="hint" role="status"></p>
+            </div>
+            <p id="clone-error" class="error wide" role="alert" hidden></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
