@@ -8,7 +8,7 @@ Then **you choose who speaks**:
 - **A cloned voice**: Gemini's words are spoken by a voice cloned from a short recording (Mistral text-to-speech), for
   example the voice of a familiar nurse or doctor, recorded with their consent.
 
-Mira is not a doctor and never diagnoses. She has five **tools** with hardcoded data (`rag_answer` for the clinic's
+Mira is not a doctor and never diagnoses. She has five **tools** (`rag_answer` for the clinic's
 appointments, hours, prescriptions and contact; `medical_info` for general health information that always puts an
 emergency first; `history`, `get_time`, `find_appointment_slots` for free appointment slots), so you can see tool calls happen without any real backend.
 Nothing here is medical advice.
