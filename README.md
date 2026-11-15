@@ -18,7 +18,7 @@ Nothing here is medical advice.
 ## 1. What is in the folder
 
 ```
-C:\voice-demo
+voice-demo
 ├── README.md                this file
 └── app\                     THE APP
     ├── .env.example         every setting, explained      (copy to .env)
@@ -26,7 +26,7 @@ C:\voice-demo
     ├── docker-compose.yml   livekit + api + worker in one command
     ├── docker\livekit.yaml  the LiveKit server's config
     ├── api\                 FastAPI: the page, call setup, voice library, vault, speech route, nightly care
-    ├── worker\              the LiveKit agent: Gemini Live + fake tools + cloned voice
+    ├── worker\              the LiveKit agent: Gemini Live + tools + cloned voice
     ├── web\                 the page (plain HTML/CSS/JS, no build step)
     ├── scripts\             start.ps1 / stop.ps1 (everything), setup, run-api, run-worker, run-livekit, test
     └── docs\                architecture.md, cloning.md, troubleshooting.md
@@ -50,7 +50,7 @@ The page loads one file from the internet: LiveKit's browser client from `cdn.js
 ### Easiest: one command
 
 ```powershell
-cd C:\voice-demo\app
+cd voice-demo\app
 .\scripts\start.ps1          # first run also does the setup; opens http://localhost:8000
 .\scripts\stop.ps1           # stops it
 ```
@@ -62,7 +62,7 @@ The two options below are the manual versions of the same thing.
 ### A. Everything in Docker (one command)
 
 ```powershell
-cd C:\voice-demo\app
+cd voice-demo\app
 copy .env.example .env        # already done for you: .env exists with a master key
 # put GOOGLE_API_KEY (and MISTRAL_API_KEY for cloning) in .env
 docker compose up --build
@@ -75,7 +75,7 @@ Open **http://localhost:8000**.
 Docker is then needed for the LiveKit server only.
 
 ```powershell
-cd C:\voice-demo\app
+cd voice-demo\app
 .\scripts\setup.ps1          # once: .env, a master key, .venv-api and .venv-worker
 # put GOOGLE_API_KEY (and MISTRAL_API_KEY) in .env
 
@@ -101,8 +101,8 @@ The API must listen on port **8000**: LiveKit's webhook (`docker/livekit.yaml`) 
 No network, no keys, no LiveKit server needed.
 
 ```powershell
-cd C:\voice-demo\app
-.\scripts\test.ps1           # 108 API tests + 81 worker tests
+cd voice-demo\app
+.\scripts\test.ps1           # 108 API tests + 84 worker tests
 ```
 
 (`test.ps1 -ApiPython ... -WorkerPython ...` points it at other Python environments.)
@@ -111,7 +111,7 @@ cd C:\voice-demo\app
 
 Checked (automatically or by hand while building):
 
-- All 189 tests pass. The vault, the voice library, the speech tuning, the call setup, the speech grant, the nightly
+- All 192 tests pass. The vault, the voice library, the speech tuning, the call setup, the speech grant, the nightly
   care and the worker's logic are covered, against fakes of Mistral and LiveKit.
 - The page loads with a clean console, works at phone width, and the whole Voices flow (import, consent, make, use)
   ran in a browser against the real API and a stand-in Mistral.

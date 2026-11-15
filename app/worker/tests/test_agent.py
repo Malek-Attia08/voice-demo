@@ -98,10 +98,10 @@ class TranscriptTests(unittest.TestCase):
 class ToolTests(unittest.TestCase):
     def build(self, announce=None):
         transcript = agent.Transcript()
-        transcript.turns.extend([("user", "refund?"), ("agent", "Let me check")])
+        transcript.turns.extend([("user", "appointment?"), ("agent", "Let me check")])
         return transcript, agent.demo_tools(transcript, announce)
 
-    def test_every_fake_tool_is_offered_to_gemini(self):
+    def test_every_tool_is_offered_to_gemini(self):
         _, built = self.build()
         self.assertEqual([tool.info.name for tool in built], ["rag_answer", "history", "medical_info", "get_time", "find_appointment_slots"])
 
@@ -115,13 +115,13 @@ class ToolTests(unittest.TestCase):
         _, built = self.build()
         history = next(tool for tool in built if tool.info.name == "history")
         answer = asyncio.run(history(raw_arguments={"count": 2}, context=SimpleNamespace()))
-        self.assertEqual(answer, "user: refund?\nagent: Let me check")
+        self.assertEqual(answer, "user: appointment?\nagent: Let me check")
 
     def test_each_call_is_announced_to_the_page_by_name_and_arguments(self):
         seen = []
         _, built = self.build(announce=lambda name, arguments, answer: seen.append((name, arguments, answer)))
-        flip = next(tool for tool in built if tool.info.name == "get_time")
-        asyncio.run(flip(raw_arguments={}, context=SimpleNamespace()))
+        clock = next(tool for tool in built if tool.info.name == "get_time")
+        asyncio.run(clock(raw_arguments={}, context=SimpleNamespace()))
         self.assertEqual(seen[0][0], "get_time")
         self.assertEqual(seen[0][1], {})
         self.assertTrue(seen[0][2].startswith("It is "))
@@ -373,9 +373,9 @@ class EventTests(unittest.TestCase):
         self.assertEqual(published[0][1], {"type": "voice.fallback", "to": "gemini"})
 
     def test_a_tool_call_goes_to_the_page(self):
-        published = self.run_events(lambda f: f.on_tool_called("rag_answer", {"question": "refund"}, "30 days"))
+        published = self.run_events(lambda f: f.on_tool_called("rag_answer", {"question": "appointment"}, "24 hours"))
         self.assertEqual(published[0][1], {"type": "tool.called", "name": "rag_answer",
-                                           "arguments": {"question": "refund"}, "answer": "30 days"})
+                                           "arguments": {"question": "appointment"}, "answer": "24 hours"})
 
     def test_an_error_says_its_kind_but_not_its_text(self):
         error = SimpleNamespace(error=RuntimeError("wss://google/session?key=SECRET"))

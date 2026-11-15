@@ -1,4 +1,4 @@
-"""Fake tools for Gemini Live in the demo: hardcoded data, no network.
+"""Tools for Gemini Live: hardcoded demo data, no network.
 
 `TOOLS` are the declarations (plain JSON Schema) the worker hands to Gemini; `call` runs one by name.
 The clock is passed in so tests do not depend on the real time.

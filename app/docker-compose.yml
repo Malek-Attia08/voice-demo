@@ -1,4 +1,4 @@
-# CareVoice: the whole demo with one command, from C:\voice-demo\app:
+# CareVoice: the whole demo with one command, from the app folder:
 #
 #   docker compose up --build
 #
@@ -8,7 +8,7 @@
 #   livekit  carries the audio between the page and the worker (knows nothing about Gemini or Mistral)
 #   api      the page, the call setup, the cloned-voice library and vault, the speech route (holds the Mistral key and
 #            the master key)
-#   worker   Gemini Live + the fake tools + the cloned voice (holds the Google key, never the Mistral key)
+#   worker   Gemini Live + the tools + the cloned voice (holds the Google key, never the Mistral key)
 #
 # Settings come from .env (see .env.example and README.md). Nothing is read from anywhere else.
 services:

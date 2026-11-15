@@ -6,7 +6,7 @@
 |---|---|---|
 | **Page** (`web/`) | Captures the microphone, plays the worker's voice, shows the conversation and tool calls, records and uploads voice samples | none (a short-lived LiveKit token per call) |
 | **LiveKit server** | Carries audio and small events between the page and the worker. Knows nothing about Gemini or Mistral | its own API key and secret |
-| **Worker** (`worker/`) | Joins the call's room, talks to Gemini Live over a WebSocket, runs the fake tools, has the cloned voice speak | Google key |
+| **Worker** (`worker/`) | Joins the call's room, talks to Gemini Live over a WebSocket, runs the tools, has the cloned voice speak | Google key |
 | **Gemini Live** | Hears the user, decides turns, thinks, asks for tool calls, and (optionally) speaks | n/a |
 | **API** (`api/`) | Serves the page, starts calls, keeps the cloned-voice library and the encrypted recordings, speaks in the clone, runs the nightly care | Mistral key, master key, LiveKit secret |
 | **Mistral** | Clones a voice from a recording; speaks text in it (Voxtral TTS) | n/a |
@@ -83,18 +83,18 @@ unit-tested with fakes but was never run against a real LiveKit call.
 
 `worker/prompts.py` is the voice prompt of Mira, CareVoice's medical assistant: she knows nothing on her own, gets everything from her tools, never diagnoses, puts an emergency first, keeps every fact a tool gives and adds none, never promises a lookup she cannot do, never mentions tools, follows the language rule, hangs up on goodbye and stops when interrupted.
 
-## The fake tools
+## The tools
 
 `worker/tools.py`. Plain Python, hardcoded data, run inside the worker.
 
 | Tool | Does |
 |---|---|
-| `rag_answer(question)` | looks for a keyword (refund, hours, shipping, support) and returns a fixed snippet, or "nothing found" |
+| `rag_answer(question)` | looks for a keyword (about Mira, appointment, hours, prescription, contact; in English, French, Dutch or German) and returns a fixed snippet, or "nothing found" |
 | `history(count)` | the last N turns of this call (default 5), from the worker's own transcript |
 | `medical_info(topic)` | canned, conservative health information (fever, headache, cough, sprain, dehydration, sore throat), always with a not-medical-advice line; anything that could be an emergency (chest pain, cannot breathe, ...) answers with the emergency number first |
 | `get_time()` | the current date and time |
 | `find_appointment_slots(specialty)` | free slots for a specialty (demo data; it cannot book) |
-| `end_call()` | (not a fake tool) Gemini says goodbye, then the worker closes the room |
+| `end_call()` | (not one of the five tools) Gemini says goodbye, then the worker closes the room |
 | `stop_speaking()` | (cloned calls only) Gemini cuts off its own reply |
 
 Every call is sent to the page as a `tool.called` event, so the Tool calls panel shows it.
@@ -107,7 +107,7 @@ On the LiveKit data topic `demo.voice_events`, JSON:
 |---|---|---|
 | `transcription.segment` | `id`, `role` (user/assistant), `content`, `final`, `interrupted` | words, updated until `final` |
 | `agent.state.changed` | `old_state`, `state` | listening / thinking / speaking: drives the orb |
-| `tool.called` | `name`, `arguments`, `answer` | a fake tool ran |
+| `tool.called` | `name`, `arguments`, `answer` | a tool ran |
 | `call.ended` | `reason` | Gemini hung up after a goodbye |
 | `voice.fallback` | `to` | the cloned voice failed; Gemini speaks with its own voice from now on |
 | `error` | `source`, `code`, `message`, `fatal` | the kind of error only, never its text (it could carry a key) |

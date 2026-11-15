@@ -1,4 +1,4 @@
-"""The demo's fake tools, in plain Python (no LiveKit, no Gemini).
+"""The tools, in plain Python (no LiveKit, no Gemini).
 
 Run from C:\\voice-demo\\app:
     python -m unittest discover -s worker/tests -t .
@@ -51,9 +51,9 @@ class RagAnswerTests(unittest.TestCase):
 
 class HistoryTests(unittest.TestCase):
     def test_it_returns_the_last_turns_oldest_first(self):
-        turns = [("user", "hi"), ("agent", "hello"), ("user", "refund?"), ("agent", "30 days")]
+        turns = [("user", "hi"), ("agent", "hello"), ("user", "appointment?"), ("agent", "24 hours")]
         answer = tools.call("history", {"count": 2}, turns=turns)
-        self.assertEqual(answer, "user: refund?\nagent: 30 days")
+        self.assertEqual(answer, "user: appointment?\nagent: 24 hours")
 
     def test_it_defaults_to_the_last_five(self):
         turns = [("user", str(n)) for n in range(8)]

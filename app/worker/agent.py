@@ -112,7 +112,7 @@ class Transcript:
 
 
 def demo_tools(transcript, announce=None):
-    """The fake tools as Gemini's function tools. `announce(name, arguments, answer)` tells the page about each call."""
+    """The tools as Gemini's function tools. `announce(name, arguments, answer)` tells the page about each call."""
 
     def make(spec):
         async def handler(raw_arguments: dict[str, object], context: RunContext):

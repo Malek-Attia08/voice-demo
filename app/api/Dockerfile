@@ -1,4 +1,4 @@
-# The demo API (and the web page it serves). Built from C:\voice-demo\app:
+# The demo API (and the web page it serves). Built from the app folder:
 #   docker build -f api/Dockerfile .
 FROM python:3.11-slim-bookworm
 
