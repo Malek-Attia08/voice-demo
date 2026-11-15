@@ -107,26 +107,9 @@ cd voice-demo\app
 
 (`test.ps1 -ApiPython ... -WorkerPython ...` points it at other Python environments.)
 
-## 5. What was checked, and what was not
 
-Checked (automatically or by hand while building):
 
-- All 192 tests pass. The vault, the voice library, the speech tuning, the call setup, the speech grant, the nightly
-  care and the worker's logic are covered, against fakes of Mistral and LiveKit.
-- The page loads with a clean console, works at phone width, and the whole Voices flow (import, consent, make, use)
-  ran in a browser against the real API and a stand-in Mistral.
-
-**Not checked** (needs your keys, hardware or Docker, none of which was available here):
-
-- A real call: Gemini Live with the real model, a real LiveKit server, a real microphone.
-- Real Mistral cloning and speech.
-- `docker compose up --build` (the images were never built here).
-- Whether the muted-Gemini path stays in sync with LiveKit's turn-taking on a real call. It is untested
-  logic and was never run against Google here.
-
-If a first call fails, `docs/troubleshooting.md` lists the likely causes in order.
-
-## 6. Safety notes
+## 5. Safety notes
 
 - `.env` holds secrets. It is in `.gitignore`. Never share one `.env` between environments: each makes its own master key.
 - The **worker never holds the Mistral key or the master key**. It gets a per-call *speech grant* and asks the API to
@@ -136,7 +119,7 @@ If a first call fails, `docs/troubleshooting.md` lists the likely causes in orde
 - Recordings are stored **encrypted**; the master key is not in the database. See `docs/cloning.md`.
 - Only record a voice with the speaker's consent. The page asks for it and stores it with the voice.
 
-## 7. More
+## 6. More
 
 - `app/docs/architecture.md`: the pieces, the flows, every endpoint and setting.
 - `app/docs/cloning.md`: what happens to a voice from recording to deletion.
